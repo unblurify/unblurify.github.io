@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Unblurify – view image at 100% pixel zoom no matter your browser or screen settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <script src='https://code.jquery.com/jquery-3.1.1.min.js'></script>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+  <style>
+    * {
+        padding: 0;
+        margin: 0;
+        font-family: 'Roboto';
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+    html {
+        width: 100%;
+        height: 100%;
+    }
+    body {
+        background: #333;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+    #container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #image {
+        display: block;
+        flex-grow: 0;
+        flex-shrink: 0;
+    }
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
+    #notice {
+        background: white;
+        border: 1px solid black;
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+        padding: 8px 12px;
+        margin-bottom: 5vh;
+        cursor: default;
+    }
+  </style>
+
+
+  <script>
+    window.onload = function()
+    {
+        var image = document.getElementById('image');
+        var body = $('body')[0];
+        var html = $('html')[0];
+        var container = document.getElementById('container');
+        var prevPixelRatio = window.devicePixelRatio;
+
+        function showNotice(duration, message)
+        {
+            $('#notice').text(message).stop(true, false).fadeTo(70, 1).fadeTo(duration, 0.99).fadeOut(300);
+        }
+
+        function setNativeSize()
+        {
+            var imageWidth = image.naturalWidth / window.devicePixelRatio;
+            var imageHeight = image.naturalHeight / window.devicePixelRatio;
+            image.style.width = imageWidth + 'px';
+            image.style.height = imageHeight + 'px';
+            container.style.width = (imageWidth + 20) > body.clientWidth ? ((imageWidth + 20) + 'px') : '100%';
+            container.style.height = (imageHeight + 20) > body.clientHeight ? ((imageHeight + 20) + 'px') : '100%';
+
+            if (prevPixelRatio != window.devicePixelRatio)
+            {
+                prevPixelRatio = window.devicePixelRatio;
+                showNotice(2000, 'Click anywhere to change image zoom mode');
+            }
+        }
+
+        function setImageSource()
+        {
+            var timer = setInterval(setNativeSize, 100);
+            image.onload = function() { clearInterval(timer); setNativeSize(); };
+            image.src = location.hash.substring(1);
+            image.style.width = 'auto';
+            image.style.height = 'auto';
+        }
+
+        window.onhashchange = setImageSource;
+        setImageSource();
+        window.onresize = setNativeSize;
+        setNativeSize();
+        showNotice(1400, 'Click anywhere for additional options');
+    };
+  </script>
+</head>
+
+<body>
+  <div id=container>
+    <img id=image>
+  </div>
+  <div id=overlay>
+    <div id=notice>
+    </div>
+  </div>
+</body>
+
+</html>
